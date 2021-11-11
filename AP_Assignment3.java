@@ -1,13 +1,11 @@
 package sem2;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Scanner;
-
+import java.io.*;
+import java.util.*;
+interface MatrixTypes{
+    Matrix check(Matrix m);
+    float [][] formN(int R,int C);
+}
 class Matrix{
     Scanner sc = new Scanner(System.in);
     protected String m;
@@ -24,7 +22,7 @@ class Matrix{
         int i = 0;
         while(i<this.m.length()){
             if(this.m.charAt(i) == ';'){
-                this.c = 0;
+                this.c = 1;
                 this.r = this.r + 1;
             }
             else if(this.m.charAt(i) == ','){
@@ -32,26 +30,30 @@ class Matrix{
             }
             i++;
         }
-        this.matrix = new float[r][c];
+        this.matrix = new float[this.r][this.c];
         i = 0;
         int j = 0;
-        while(i < this.m.length()){
-            if(this.m.charAt(i) == ';') {
-                j = j + 1;
-            }
-            if(this.m.charAt(i) == ',' || this.m.charAt(i) != ']'){
-                int k = i-1;
-                while(this.m.charAt(k) != ',' || this.m.charAt(k) != '['){
-                    temp += this.m.charAt(k);
+        int l = 0;
+        while(l < this.m.length()){
+            if(this.m.charAt(l) == ',' || this.m.charAt(l) == ']' || this.m.charAt(l) == ';'){
+                int k = l-1;
+                this.temp = "";
+                while(this.m.charAt(k) != ',' && this.m.charAt(k) != '[' && this.m.charAt(k) != ';'){
+                    this.temp += this.m.charAt(k);
                     k = k - 1;
                 }
-                this.matrix[j][i] = Integer.parseInt(temp);
+                this.matrix[j][i] = Integer.parseInt(this.temp);
+                i++;
             }
-            i++;
+            if(this.m.charAt(l) == ';') {
+                j = j + 1;
+                i = 0;
+            }
+            l++;
         }
         return this;
     }
-    public Matrix checkO(){
+    public Matrix checkO(Matrix m){
         SingletonMatrix m13 = new SingletonMatrix();
         OnesMatrix m14 = new OnesMatrix();
         NullMatrix m15 = new NullMatrix();
@@ -67,59 +69,39 @@ class Matrix{
         RowMatrix m2 = new RowMatrix();
         ColumnMatrix m3 = new ColumnMatrix();
         SquareMatrix m4 =  new SquareMatrix();
-        if(m13.check()){
-            if(!m14.check(this.matrix)){
-                if(!m15.check(this.matrix)){
-                    return this;
-                }
-            }
-        }
-        else if(!m9.check(this.matrix)){
-            if(!m6.check(this.matrix)) {
-                if (!m12.check(this.matrix)) {
-                    if (!m11.check(this.matrix)) {
-                        if (!m10.check(this.matrix)) {
-                            if (!m7.check(this.matrix)) {
-                                if (!m5.check(this.matrix)) {
-                                    if (m4.check()) {
-                                        if (!m2.check()) {
-                                            if (!m3.check()) {
-                                                m1.check();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            } else if (!m8.check(this.matrix)) {
-                            if (!m5.check(this.matrix)) {
-                                if (m4.check()) {
-                                    if (!m2.check()) {
-                                        if (!m3.check()) {
-                                            m1.check();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return this;
+        m15.check(m);
+        m13.check(m);
+        m14.check(m);
+        m12.check(m);
+        m11.check(m);
+        m10.check(m);
+        m9.check(m);
+        m8.check(m);
+        m7.check(m);
+        m6.check(m);
+        m5.check(m);
+        m4.check(m);
+        m2.check(m);
+        m3.check(m);
+        m1.check(m);
+        return m;
     }
-    protected float [][] inverse = new float[r][c];
+    protected float [][] inverse = new float[this.r][this.c];
     public void formInverse(float [][] i){
         this.inverse = i;
     }
 }
 
-class RectangularMatrix extends Matrix{
-    void check(){
-        if(c!=r){
-        status.add(this);
+class RectangularMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+        if(m.c!=m.r){
+        m.status.add(this);
         }
+        return m;
     }
-    float [][] formN(int R, int C){
+    @Override
+    public float [][] formN(int R, int C){
         r = R;
         c = C;
         matrix = new float[r][c];
@@ -132,15 +114,16 @@ class RectangularMatrix extends Matrix{
         return matrix;
     }
 }
-class RowMatrix extends Matrix{
-    public Boolean check(){
-        if(r == 1){
-            status.add(this);
-            return true;
+class RowMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+        if(m.r == 1 && m.c != 1){
+            m.status.add(this);
         }
-        return false;
+        return m;
     }
-    float [][] formN(int C){
+    @Override
+    public float [][] formN(int C,int R){
         c = C;
         matrix = new float[1][c];
         System.out.println("Enter the matrix values: ");
@@ -150,15 +133,16 @@ class RowMatrix extends Matrix{
         return matrix;
     }
 }
-class ColumnMatrix extends Matrix{
-    public Boolean check(){
-        if(c == 1){
-            status.add(this);
-            return true;
+class ColumnMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+        if(m.c == 1 && m.r != 1){
+            m.status.add(this);
         }
-        return false;
+        return m;
     }
-    float [][] formN(int R) {
+    @Override
+    public float [][] formN(int C, int R) {
         r = R;
         matrix = new float[r][1];
         System.out.println("Enter the matrix values: ");
@@ -168,66 +152,60 @@ class ColumnMatrix extends Matrix{
         return matrix;
     }
 }
-class SquareMatrix extends Matrix{
-    public boolean check(){
-        if(c==r){
-            status.add(this);
-            return true;
+class SquareMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+        if (m.c == m.r && m.r != 1) {
+            m.status.add(this);
         }
-        return false;
+        return m;
     }
-    float [][] formN(int R,int C){
-        r = R;
-        c = C;
-        matrix = new float[r][c];
-        if(r == c) {
-            matrix = new float[r][r];
-            System.out.println("Enter the matrix values: ");
-            for (int i = 0; i < r; i++) {
-                for (int j = 0; j < r; j++) {
-                    matrix[i][j] = sc.nextInt();
-                }
+    @Override
+    public float [][] formN(int R,int C){
+        this.r = R;
+        this.c = C;
+        this.matrix = new float[r][c];
+        System.out.println("Enter the matrix values: ");
+        for (int i = 0; i < this.r; i++) {
+            for (int j = 0; j < this.c; j++) {
+                this.matrix[i][j] = sc.nextInt();
             }
-            return matrix;
         }
-        else{
-            System.out.println("wrong dimensions");
-            return null;
-        }
+        return this.matrix;
     }
 }
-class SymmetricMatrix extends Matrix{
-    public Boolean check(float [][] m){
-        float [][] transpose = new float[c][r];
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++) {
-                transpose[j][i] = m[i][j];
-            }
-        }
-        int flag = 1;
-        if (r == c) {
-            for (int i = 0; i < r; i++) {
-                for (int j = 0; j < c; j++) {
-                    if (m[i][j] != transpose[i][j]) {
-                        flag = 0;
-                        break;
-                    }
+class SymmetricMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+        if(m.r != 1 && m.c != 1 ) {
+            float[][] transpose = new float[m.c][m.r];
+            for (int i = 0; i < m.r; i++) {
+                for (int j = 0; j < m.c; j++) {
+                    transpose[j][i] = m.matrix[i][j];
                 }
             }
-            if(flag == 1){
-                status.add(this);
-                return true;
+            int flag = 1;
+            if (m.r == m.c) {
+                for (int i = 0; i < m.r; i++) {
+                    for (int j = 0; j < m.c; j++) {
+                        if (m.matrix[i][j] != transpose[i][j]) {
+                            flag = 0;
+                            break;
+                        }
+                    }
+                }
+                if (flag == 1) {
+                    m.status.add(this);
+                }
             }
         }
-        return false;
+        return m;
     }
-    float [][] formN(int R, int C){
-        r = R;
-        c = C;
-        matrix = new float[r][c];
-        if(r ==c) {
-            matrix = new float[r][c];
-            System.out.println("Enter the matrix values for only one side and diagonal: ");
+    @Override
+    public float [][] formN(int R, int C) {
+        if (R == C) {
+            this.matrix = new float[R][C];
+            System.out.println("Enter the matrix values for only upper side and diagonal: ");
             for (int i = 0; i < r; i++) {
                 for (int j = i; j < c; j++) {
                     matrix[i][j] = sc.nextInt();
@@ -236,41 +214,38 @@ class SymmetricMatrix extends Matrix{
             }
             return matrix;
         }
-        else{
-            System.out.println("Wrong matrix dimensions");
-            return null;
-        }
+        return null;
     }
 }
-class SkewSymmetricMatrix extends Matrix{
-    public Boolean check(float [][] m) {
+class SkewSymmetricMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m) {
+        if(m.r != 1 && m.c != 1 ) {
             int flag = 0;
-        float [][] transpose = new float[c][r];
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++) {
-                transpose[j][i] = m[i][j];
-            }
-        }
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++) {
-                if (transpose[i][j] + m[i][j] != 0) {
-                    flag = 1;
-                    break;
+            float[][] transpose = new float[m.c][m.r];
+            for (int i = 0; i < m.r; i++) {
+                for (int j = 0; j < m.c; j++) {
+                    transpose[j][i] = m.matrix[i][j];
                 }
             }
+            for (int i = 0; i < m.r; i++) {
+                for (int j = 0; j < m.c; j++) {
+                    if (transpose[i][j] + m.matrix[i][j] != 0) {
+                        flag = 1;
+                        break;
+                    }
+                }
+            }
+            if (flag == 0) {
+                m.status.add(this);
+            }
         }
-        if (flag == 0) {
-            status.add(this);
-            return true;
-        }
-        return false;
+        return m;
     }
-    float [][] formN(int R, int C){
-        r = R;
-        c = C;
-        matrix = new float[r][c];
-        if(r == c){
-        matrix = new float[r][c];
+    @Override
+    public float [][] formN(int R, int C){
+        if(R == C){
+        matrix = new float[R][C];
         System.out.println("Enter the matrix values for only upper side ");
         for(int i = 0;i<r;i++){
             for(int j = i+1;j<c;j++){
@@ -291,70 +266,72 @@ class SkewSymmetricMatrix extends Matrix{
         }
     }
 }
-class UpperTriangularMatrix extends Matrix{
-    public Boolean check(float [][] m) {
-        int flag = 0;
-        for (int i = 1; i < r; i++) {
-            for (int j = 0; j < i; j++) {
-                if (m[i][j] != 0) {
-                    flag = 1;
-                    break;
+class UpperTriangularMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m) {
+        if(m.r != 1 && m.c != 1 ) {
+            int flag = 0;
+            for (int i = 1; i < m.r; i++) {
+                for (int j = 0; j < i; j++) {
+                    if (m.matrix[i][j] != 0) {
+                        flag = 1;
+                        break;
+                    }
                 }
             }
+            if (flag == 0) {
+                m.status.add(this);
+            }
         }
-        if(flag == 0){
-            status.add(this);
-            return true;
-        }
-        return false;
+        return m;
     }
-    float [][] formN(int R, int C){
-        r = R;
-        c = C;
-        matrix = new float[r][c];
-        if(r == c){
-            for(int i = 0;i<r;i++){
-                for(int j = 0;j<c;j++){
+    @Override
+    public float [][] formN(int R, int C){
+        matrix = new float[R][C];
+        if(R == C){
+            for(int i = 0;i<R;i++){
+                for(int j = 0;j<C;j++){
                     if(i>j) {
                         matrix[i][j] = 0;
                     }
                     else{
-                            matrix[i][j] = sc.nextInt();
-                        }
+                        matrix[i][j] = sc.nextInt();
+                    }
                 }
             }
             return matrix;
         }
         else{
-            System.out.println("matrix can't be formed");
+            System.out.println("Wrong dimensions");
             return null;
         }
     }
 }
-class LowerTriangularMatrix extends Matrix{
-    public Boolean check(float [][] m){
-        int flag = 0;
-        for (int i = 0; i < r; i++) {
-            for (int j = i + 1; j < r; j++) {
-                if(m[i][j] != 0) {
-                    flag = 1;
-                    break;
+class LowerTriangularMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+        if(m.r != 1 && m.c != 1 ) {
+            int flag = 0;
+            for (int i = 0; i < m.r; i++) {
+                for (int j = i + 1; j < m.r; j++) {
+                    if (m.matrix[i][j] != 0) {
+                        flag = 1;
+                        break;
+                    }
                 }
             }
+            if (flag == 0) {
+                m.status.add(this);
+            }
         }
-        if(flag == 0){
-            status.add(this);
-            return true;
-        }
-        return false;
+        return m;
     }
-    float [][] formN(int R, int C){
-        r = R;
-        c = C;
-        matrix = new float[r][c];
-        if(r == c){
-            for(int i = 0;i<r;i++){
-                for(int j = 0;j<c;j++){
+    @Override
+    public float [][] formN(int R, int C){
+        matrix = new float[R][C];
+        if(R == C){
+            for(int i = 0;i<R;i++){
+                for(int j = 0;j<C;j++){
                     if(i<j) {
                         matrix[i][j] = 0;
                     }
@@ -366,19 +343,19 @@ class LowerTriangularMatrix extends Matrix{
             return matrix;
         }
         else{
-            System.out.println("matrix can;t be formed");
+            System.out.println("matrix can't be formed");
             return null;
         }
     }
 }
-class SingularMatrix extends Matrix{
-    void getCofactor(float[][] mat, float[][] temp, int l, int m) {
+class SingularMatrix extends Matrix implements MatrixTypes{
+    private void getCofactor(float[][] mat, float[][] temp, int l, int m,int N) {
         int i = 0, j = 0;
-        for (int row = 0; row < r; row++) {
-            for (int col = 0; col < c; col++) {
+        for (int row = 0; row < N; row++) {
+            for (int col = 0; col < N; col++) {
                 if (row != l && col != m) {
                     temp[i][j++] = mat[row][col];
-                    if (j == c - 1) {
+                    if (j == N - 1) {
                         j = 0;
                         i++;
                     }
@@ -386,36 +363,36 @@ class SingularMatrix extends Matrix{
             }
         }
     }
-    float isSingular(float [][] matrix,int N) {
+    private float isSingular(float [][] matrix,int N) {
         int flag = 0;
-        if (r == 1) {
+        if (N == 1) {
             return matrix[0][0];
         }
-        float [][] temp = new float[r][r];
+        float [][] temp = new float[N][N];
         int sign = 1;
-        for (int f = 0; f < r; f++) {
-            getCofactor(matrix, temp, 0, f);
+        for (int f = 0; f < N; f++) {
+            getCofactor(matrix, temp, 0, f,N);
             flag += sign * matrix[0][f] * isSingular(temp, N - 1);
             sign = -sign;
         }
         return flag;
     }
-    public Boolean check(float [][] m){
-        if (isSingular(m,r) == 1)
-        {
-            status.add(this);
-            return true;
+    @Override
+    public Matrix check(Matrix m){
+        if(m.r != 1 && m.c != 1 ) {
+            if (isSingular(m.matrix, m.r) == 1) {
+                m.status.add(this);
+            }
         }
-        return false;
+        return m;
     }
-    float [][] formN(int R, int C){
-        r = R;
-        c = C;
-        matrix = new float[r][c];
-        float [][] temp = new float[r][c];
-        if(r == c) {
-            for (int i = 0; i < r; i++) {
-                for (int j = 0; j < c; j++) {
+    @Override
+    public float [][] formN(int R, int C){
+        if(R == C) {
+            matrix = new float[R][C];
+            float [][] temp = new float[R][C];
+            for (int i = 0; i < R; i++) {
+                for (int j = 0; j < C; j++) {
                     temp[i][j] = sc.nextInt();
                 }
             }
@@ -433,31 +410,32 @@ class SingularMatrix extends Matrix{
         }
     }
 }
-class DiagonalMatrix extends Matrix{
-    public Boolean check(float [][] m){
-        int flag  = 0;
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++) {
-                if ((i != j) && (m[i][j] != 0)) {
-                    flag = 1;
-                    break;
+class DiagonalMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+        if(m.r != 1 && m.c != 1 ) {
+            int flag = 0;
+            for (int i = 0; i < m.r; i++) {
+                for (int j = 0; j < m.c; j++) {
+                    if ((i != j) && (m.matrix[i][j] != 0)) {
+                        flag = 1;
+                        break;
+                    }
                 }
             }
+            if (flag == 0) {
+                m.status.add(this);
+            }
         }
-        if(flag == 0){
-            status.add(this);
-            return true;
-        }
-        return false;
+        return m;
     }
-    float [][] formN(int R, int C){
-        r = R;
-        c = C;
-        if(r ==c){
-            matrix = new float[r][c];
+    @Override
+    public float [][] formN(int R, int C){
+        if(R == C){
+            matrix = new float[R][C];
             System.out.println("Enter the diagonal elements");
-            for(int i = 0;i<r;i++){
-                for(int j = 0;j<c;j++){
+            for(int i = 0;i<R;i++){
+                for(int j = 0;j<C;j++){
                     if(i == j) {
                         matrix[i][j] = sc.nextInt();
                     }else{
@@ -467,89 +445,86 @@ class DiagonalMatrix extends Matrix{
             }
             return matrix;
         }
-
         else{
             System.out.println("Matrix can't be formed");
             return null;
         }
     }
 }
-class ScalarMatrix extends Matrix {
-    public Boolean check(float[][] m) {
-        int flag1 = 0, flag2 = 0;
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++) {
-                if ((i != j) && (m[i][j] != 0)) {
-                    flag1 = 1;
+class ScalarMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m) {
+        if(m.r != 1 && m.c != 1 ) {
+            int flag1 = 0, flag2 = 0;
+            for (int i = 0; i < m.r; i++) {
+                for (int j = 0; j < m.c; j++) {
+                    if ((i != j) && (m.matrix[i][j] != 0)) {
+                        flag1 = 1;
+                        break;
+                    }
+                }
+            }
+            for (int i = 0; i < m.r - 1; i++) {
+                if (m.matrix[i][i] != m.matrix[i + 1][i + 1]) {
+                    flag2 = 1;
                     break;
                 }
             }
-        }
-        for (int i = 0; i < r - 1; i++) {
-            if (m[i][i] != m[i + 1][i + 1]) {
-                flag2 = 1;
-                break;
+            if (flag1 == 0 && flag2 == 0) {
+                m.status.add(this);
             }
         }
-        if (flag1 == 0 && flag2 == 0) {
-            status.add(this);
-            return true;
-        }
-        return false;
+        return m;
     }
-    float [][] formN(int R, int C) {
-        r = R;
-        c = C;
-        {
-            if (r == c) {
-                System.out.println("enter the diagonal element:");
-                int num = sc.nextInt();
-                matrix = new float[r][c];
-                for (int i = 0; i < r; i++) {
-                    for (int j = 0; j < c; j++) {
-                        if (i == j) {
-                            matrix[i][j] = num;
-                        } else {
-                            matrix[i][j] = 0;
-                        }
+    @Override
+    public float [][] formN(int R, int C) {
+        if (R == C) {
+            System.out.println("enter the diagonal element(note all the elements will be of same value):");
+            int num = sc.nextInt();
+            matrix = new float[R][C];
+            for (int i = 0; i < R; i++) {
+                for (int j = 0; j < C; j++) {
+                    if (i == j) {
+                        matrix[i][j] = num;
+                    } else {
+                        matrix[i][j] = 0;
                     }
                 }
-                return matrix;
-            } else {
-                System.out.println("Matrix can't be formed");
-                return null;
             }
+            return matrix;
+        } else {
+            System.out.println("Matrix can't be formed");
+            return null;
         }
     }
 }
-class IdentityMatrix extends Matrix{
-    public Boolean check(float [][] m){
-        int flag1 = 0, flag2 = 0;
-        for (int i = 0; i < r; i++)
-        {
-            for (int j = 0; j < c; j++)
-            {
-                if (i == c && m[r][c] != 1) {
-                    flag1 = 1;
-                }
-                else if (i != j && m[i][j] != 0) {
-                    flag2 = 1;
+class IdentityMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+        if(m.r!=1 && m.c!=1) {
+            int flag1 = 0, flag2 = 0;
+            for (int i = 0; i < m.r; i++) {
+                for (int j = 0; j < m.c; j++) {
+                    if (i == c && m.matrix[r][c] != 1) {
+                        flag1 = 1;
+                    } else if (i != j && m.matrix[i][j] != 0) {
+                        flag2 = 1;
+                    }
                 }
             }
+            if (flag1 == 0 && flag2 == 0) {
+                m.status.add(this);
+            }
         }
-        if(flag1 == 0 && flag2 == 0){
-            status.add(this);
-            return true;
-        }
-        return false;
+        return m;
     }
-    float [][] formN(int R, int C){
-        r = R;
-        c = C;
-        if (r==c){
-            matrix = new float[r][c];
-            for(int i = 0;i<r;i++){
-                for(int j = 0;j<c;j++){
+
+    @Override
+    public float [][] formN(int R, int C){
+        if (R==C){
+            matrix = new float[R][C];
+            for(int i = 0;i<R;i++){
+                for(int j = 0;j<C;j++){
                     if(i == j) {
                         matrix[i][j] = 1;
                     }
@@ -561,48 +536,52 @@ class IdentityMatrix extends Matrix{
             return matrix;
         }
         else{
-            System.out.println("Matrix can't be formed");
+            System.out.println("Wrong Dimensions");
             return null;
         }
     }
 }
-class SingletonMatrix extends Matrix{
-    public Boolean check(){
-        if(r == 1 & c == 1){
-            status.add(this);
-            return true;
+class SingletonMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+        if(m.r == 1 && m.c == 1){
+            m.status.add(this);
         }
-        return false;
+        return m;
     }
-    float [][] formN(){
-        r = 1;
-        c = 1;
-        System.out.println("enter the element:");
-        matrix = new float[1][1];
-        matrix[0][0] = sc.nextInt();
-        return matrix;
+    @Override
+    public float [][] formN(int R,int C){
+        if(R == 1 && C==1) {
+            System.out.println("enter the element:");
+            matrix = new float[1][1];
+            matrix[0][0] = sc.nextInt();
+            return matrix;
+        }
+        else{
+            System.out.println("not a singleton matrix");
+            return null;
+        }
     }
 }
-class OnesMatrix extends Matrix{
-    public Boolean check(float [][] m){
-        int flag = 1;
-        for(int i = 0; i<r; i++){
-            for(int j = 0; j<c; j++){
-                if(m[i][j] != 1) {
-                    flag = 0;
-                    break;
+class OnesMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
+            int flag = 1;
+            for (int i = 0; i < m.r; i++) {
+                for (int j = 0; j < m.c; j++) {
+                    if (m.matrix[i][j] != 1) {
+                        flag = 0;
+                        break;
+                    }
                 }
             }
-        }
-        if(flag == 1){
-            status.add(this);
-            return true;
-        }
-        return false;
+            if (flag == 1) {
+                m.status.add(this);
+            }
+        return m;
     }
-    float [][] formN(int R, int C){
-        r = R;
-        c = C;
+    @Override
+    public float [][] formN(int R, int C){
         matrix = new float[r][c];
         for(int i = 0;i<r;i++){
             for(int j = 0;j<c;j++){
@@ -612,24 +591,25 @@ class OnesMatrix extends Matrix{
         return matrix;
     }
 }
-class NullMatrix extends Matrix{
-    public Boolean check(float [][] m){
+class NullMatrix extends Matrix implements MatrixTypes{
+    @Override
+    public Matrix check(Matrix m){
         int flag = 1;
-        for(int i = 0; i<r; i++){
-            for(int j = 0; j<c; j++){
-                if(m[i][j] != 0) {
+        for(int i = 0; i<m.r; i++){
+            for(int j = 0; j<m.c; j++){
+                if(m.matrix[i][j] != 0) {
                     flag = 0;
                     break;
                 }
             }
         }
         if(flag == 1){
-            status.add(this);
-            return true;
+            m.status.add(this);
         }
-        return false;
+        return m;
     }
-    float [][] formN(int R, int C){
+    @Override
+    public float [][] formN(int R, int C){
         r = R;
         c = C;
         matrix = new float[r][c];
@@ -645,8 +625,9 @@ class NullMatrix extends Matrix{
 class MatrixOperations{
     void display (float[][] A){
         for (int i = 0; i < A.length; i++) {
+            System.out.print("\t");
             for (int j = 0; j < A[i].length; j++)
-                System.out.printf("%.4f ", A[i][j]);
+                System.out.printf("%.4f ",A[i][j]);
             System.out.println();
         }
     }
@@ -658,6 +639,7 @@ class MatrixOperations{
             }
         }
         m.matrix = transpose;
+        display(m.matrix);
         return m;
     }
     void Addition(Matrix m1, Matrix m2){
@@ -961,11 +943,19 @@ class MatrixOperations{
         display(temp);
     }
     void Task15(ArrayList<Matrix> a,String s){
+        String condition;
         for(int i = 0;i<a.size();i++){
             Matrix m = a.get(i);
             for(int j = 0;j<m.status.size();j++){
-                String [] condition = m.status.get(i).getClass().toString().split(".");
-                if(condition[condition.length-1].equals(s)){
+                String [] type = m.status.get(j).getClass().toString().split(" ");
+                StringBuilder name = new StringBuilder();
+                int q = type[1].length()-1;
+                while(type[1].charAt(q) != '.'){
+                    name.append(type[1].charAt(q));
+                    q--;
+                }
+                condition = name.reverse().toString().toLowerCase(Locale.ROOT);
+                if(condition.equals(s)){
                     display(m.matrix);
                 }
             }
@@ -1000,15 +990,25 @@ class MatrixOperations{
 //    }
     }
     Matrix Task3(Matrix m){
+        String s = "";
         Scanner sc = new Scanner(System.in);
         for(int i = 0;i<m.status.size();i++){
-            String [] s = m.status.get(i).getClass().toString().split(".");
-            if(s[s.length-1].toLowerCase(Locale.ROOT).equals("nullmatrix") || s[s.length-1].toLowerCase(Locale.ROOT).equals("onesmatrix") || s[s.length-1].toLowerCase(Locale.ROOT).equals("symmetricmatrix")
-                    || s[s.length-1].toLowerCase(Locale.ROOT).equals("skewsymmtricmatrix")||s[s.length-1].toLowerCase(Locale.ROOT).equals("identitymatrix")){
+            for (int j = 0; i < m.status.size(); i++) {
+                String [] type = m.status.get(j).getClass().toString().split(" ");
+                StringBuilder name = new StringBuilder();
+                int q = type[1].length()-1;
+                while(type[1].charAt(q) != '.'){
+                    name.append(type[1].charAt(q));
+                    q--;
+                }
+                s = name.reverse().toString().toLowerCase(Locale.ROOT);
+            }
+            if(s.equals("nullmatrix") || s.equals("onesmatrix") || s.equals("symmetricmatrix")
+                    || s.equals("skewsymmtricmatrix")||s.equals("identitymatrix")){
                 System.out.println("Can't perform change for the matrix");
                 return null;
             }
-            else if(s[s.length-1].toLowerCase(Locale.ROOT).equals("diagonalmatrix")){
+            else if(s.equals("diagonalmatrix")){
                 System.out.println("Enter the position in the matrix: ");
                 int R = sc.nextInt();
                 int C = sc.nextInt();
@@ -1020,16 +1020,14 @@ class MatrixOperations{
                     System.out.println("Give the element: ");
                     float num = sc.nextFloat();
                     m.matrix[R][C] = num;
-                    return m;
                 }
             }
-            else if(s[s.length-1].toLowerCase(Locale.ROOT).equals("scalarmatrix")){
+            else if(s.equals("scalarmatrix")){
                 System.out.println("Enter the position in the matrix(note:- all the elements along the diagonal will change to the input): ");
                 int R = sc.nextInt();
                 int C = sc.nextInt();
                 if(R != C){
                     System.out.println("Cannot perform any change in the matrix");
-                    return null;
                 }
                 else{
                     System.out.println("Give the element: ");
@@ -1041,10 +1039,9 @@ class MatrixOperations{
                             }
                         }
                     }
-                    return m;
                 }
             }
-            else if(s[s.length-1].toLowerCase(Locale.ROOT).equals("rowmatrix")){
+            else if(s.equals("rowmatrix")){
                 System.out.println("Enter the position in the matrix");
                 int R = sc.nextInt();
                 int C = sc.nextInt();
@@ -1058,7 +1055,7 @@ class MatrixOperations{
                     m.matrix[R][C] = num;
                 }
             }
-            else if(s[s.length-1].toLowerCase(Locale.ROOT).equals("columnmatrix")){
+            else if(s.equals("columnmatrix")){
                 System.out.println("Enter the position in the matrix");
                 int R = sc.nextInt();
                 int C = sc.nextInt();
@@ -1072,7 +1069,7 @@ class MatrixOperations{
                     m.matrix[R][C] = num;
                 }
             }
-            else if(s[s.length-1].toLowerCase(Locale.ROOT).equals("lowertriangularmatrix")){
+            else if(s.equals("lowertriangularmatrix")){
                 System.out.println("Enter the position in the matrix");
                 int R = sc.nextInt();
                 int C = sc.nextInt();
@@ -1086,7 +1083,7 @@ class MatrixOperations{
                     m.matrix[R][C] = num;
                 }
             }
-            else if(s[s.length-1].toLowerCase(Locale.ROOT).equals("uppertriangularmatrix")){
+            else if(s.equals("uppertriangularmatrix")){
                 System.out.println("Enter the position in the matrix");
                 int R = sc.nextInt();
                 int C = sc.nextInt();
@@ -1100,7 +1097,7 @@ class MatrixOperations{
                     m.matrix[R][C] = num;
                 }
             }
-            else if(s[s.length-1].toLowerCase(Locale.ROOT).equals("singletonmatrix")){
+            else if(s.equals("singletonmatrix")){
                 System.out.println("Give the element: ");
                 float num = sc.nextFloat();
                 m.matrix[0][0] = num;
@@ -1126,23 +1123,23 @@ class MatrixOperations{
                 int r = sc.nextInt();
                 int c = sc.nextInt();
                 m.matrix = m1.formN(r,c);
-                m.checkO();
+                m = m.checkO(m);
             }
             break;
             case "rowmatrix":{
                 RowMatrix m2 = new RowMatrix();
                 System.out.println("Enter the number of columns: ");
                 int c = sc.nextInt();
-                m.matrix = m2.formN(c);
-                m.checkO();
+                m.matrix = m2.formN(c,1);
+                m = m.checkO(m);
             }
             break;
             case "columnmatrix":{
                 ColumnMatrix m3 = new ColumnMatrix();
                 System.out.println("Enter the number of rows: ");
                 int r = sc.nextInt();
-                m.matrix = m3.formN(r);
-                m.checkO();
+                m.matrix = m3.formN(1,r);
+                m = m.checkO(m);
             }
             break;
             case "squarematrix":{
@@ -1150,11 +1147,14 @@ class MatrixOperations{
                 System.out.println("Enter the number of rows and columns: ");
                 int r = sc.nextInt();
                 int c = sc.nextInt();
-                if(m4.matrix != null) {
+                if(r == c) {
                     m.matrix = m4.formN(r, c);
-                    m.checkO();
+                    m = m.checkO(m);
                 }
-                else return null;
+                else {
+                    System.out.println("wrong dimensions");
+                    return null;
+                }
             }
             break;
             case "symmetricmatrix":{
@@ -1162,11 +1162,14 @@ class MatrixOperations{
                 System.out.println("Enter the number of rows and columns: ");
                 int r = sc.nextInt();
                 int c = sc.nextInt();
-                if(m5.matrix != null) {
-                    m.matrix = m5.formN(r, c);
-                    m.checkO();
+                m.matrix = m5.formN(r, c);
+                if(m.matrix == null){
+                    System.out.println("Wrong Dimensions");
+                    return null;
                 }
-                else return null;
+                else{
+                    m=m.checkO(m);
+                }
             }
             break;
             case "skewsymmetricmatrix":{
@@ -1174,9 +1177,9 @@ class MatrixOperations{
                 System.out.println("Enter the number of rows and columns: ");
                 int r = sc.nextInt();
                 int c = sc.nextInt();
+                m.matrix = m6.formN(r, c);
                 if(m6.matrix != null) {
-                    m.matrix = m6.formN(r, c);
-                    m.checkO();
+                    m = m.checkO(m);
                 }
                 else return null;
             }
@@ -1186,9 +1189,9 @@ class MatrixOperations{
                 System.out.println("Enter the number of rows and columns: ");
                 int r = sc.nextInt();
                 int c = sc.nextInt();
+                m.matrix = m7.formN(r, c);
                 if(m7.matrix != null) {
-                    m.matrix = m7.formN(r, c);
-                    m.checkO();
+                    m = m.checkO(m);
                 }
                 else return null;
             }
@@ -1198,9 +1201,9 @@ class MatrixOperations{
                 System.out.println("Enter the number of rows and columns: ");
                 int r = sc.nextInt();
                 int c = sc.nextInt();
+                m.matrix = m8.formN(r, c);
                 if(m8.matrix != null) {
-                    m.matrix = m8.formN(r, c);
-                    m.checkO();
+                    m = m.checkO(m);
                 }
                 else return null;
             }
@@ -1210,9 +1213,9 @@ class MatrixOperations{
                 System.out.println("Enter the number of rows and columns: ");
                 int r = sc.nextInt();
                 int c = sc.nextInt();
+                m.matrix = m9.formN(r, c);
                 if(m9.matrix != null) {
-                    m.matrix = m9.formN(r, c);
-                    m.checkO();
+                    m = m.checkO(m);
                 }
                 else return null;
             }
@@ -1222,9 +1225,9 @@ class MatrixOperations{
                 System.out.println("Enter the number of rows and columns: ");
                 int r = sc.nextInt();
                 int c = sc.nextInt();
+                m.matrix = m10.formN(r, c);
                 if(m10.matrix != null) {
-                    m.matrix = m10.formN(r, c);
-                    m.checkO();
+                    m = m.checkO(m);
                 }
                 else return null;
             }
@@ -1234,9 +1237,9 @@ class MatrixOperations{
                 System.out.println("Enter the number of rows and columns: ");
                 int r = sc.nextInt();
                 int c = sc.nextInt();
+                m.matrix = m11.formN(r, c);
                 if(m11.matrix != null) {
-                    m.matrix = m11.formN(r, c);
-                    m.checkO();
+                    m = m.checkO(m);
                 }
                 else return null;
             }
@@ -1246,17 +1249,17 @@ class MatrixOperations{
                 System.out.println("Enter the number of rows and columns: ");
                 int r = sc.nextInt();
                 int c = sc.nextInt();
+                m.matrix = m12.formN(r, c);
                 if(m12.matrix != null) {
-                    m.matrix = m12.formN(r, c);
-                    m.checkO();
+                    m = m.checkO(m);
                 }
                 else return null;
             }
             break;
             case "singletonmatrix":{
                 SingletonMatrix m13 = new SingletonMatrix();
-                m.matrix = m13.formN();
-                m.checkO();
+                m.matrix = m13.formN(1,1);
+                m = m.checkO(m);
             }
             break;
             case "onesmatrix":{
@@ -1265,7 +1268,7 @@ class MatrixOperations{
                 int r = sc.nextInt();
                 int c = sc.nextInt();
                 m.matrix = m14.formN(r,c);
-                m.checkO();
+                m = m.checkO(m);
             }
             break;
             case "nullmatrix":{
@@ -1274,7 +1277,7 @@ class MatrixOperations{
                 int r = sc.nextInt();
                 int c = sc.nextInt();
                 m.matrix = m15.formN(r,c);
-                m.checkO();
+                m = m.checkO(m);
             }
             break;
             default:
@@ -1288,298 +1291,299 @@ class MatrixOperations{
 
 public class AP_Assignment3 {
     protected HashMap<String, Matrix> matrix = new HashMap<>();
-    public static void main(String[] args)  throws IOException {
+    public static void main(String[] args) throws IOException {
         AP_Assignment3 a = new AP_Assignment3();
         MatrixOperations mo = new MatrixOperations();
-        Scanner sc  = new Scanner(System.in);
-        BufferedReader reader =new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("""
-                1. Take matrices as input and label them with appropriate matrix-types.
-                2. Create matrices of requested matrix-types and label them with appropriate matrix-types.
-                3. Change the elements of a matrix as long as the fixed matrix-type labels remain valid.
-                4. Display all the matrix-type labels of a requested matrix.
-                5. Perform addition, subtraction, multiplication & division.
-                6. Perform element-wise operations.
-                7. Transpose matrices.
-                8. Inverse matrices.
-                9. Compute means: row-wise mean, column-wise mean, mean of all the elements.
-                10. Compute determinants.
-                11. Use singleton matrices as scalars, if requested.
-                12. Compute A+AT
-                13. Compute Eigen vectors and values.
-                14. Solve sets of linear equations using matrices.
-                15. Retrieve all the existing matrices (entered or created) having requested matrix-type labels.""");
-
-        int op = sc.nextInt();
-        switch(op){
-            case 1:{
-                String inp = reader.readLine();
-                String name = "";
-                int i = 0;
-                while(inp.charAt(i) != '='){
-                    name = name + inp.charAt(i);
-                    i++;
+        Scanner sc = new Scanner(System.in);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while (true) {
+            System.out.println();
+            System.out.println();
+            System.out.println("""
+                    1. Take matrices as input and label them with appropriate matrix-types.
+                    2. Create matrices of requested matrix-types and label them with appropriate matrix-types.
+                    3. Change the elements of a matrix as long as the fixed matrix-type labels remain valid.
+                    4. Display all the matrix-type labels of a requested matrix.
+                    5. Perform addition, subtraction, multiplication & division.
+                    6. Perform element-wise operations.
+                    7. Transpose matrices.
+                    8. Inverse matrices.
+                    9. Compute means: row-wise mean, column-wise mean, mean of all the elements.
+                    10. Compute determinants.
+                    11. Use singleton matrices as scalars, if requested.
+                    12. Compute A+AT
+                    13. Compute Eigen vectors and values.
+                    14. Solve sets of linear equations using matrices.
+                    15. Retrieve all the existing matrices (entered or created) having requested matrix-type labels.""");
+            int op = sc.nextInt();
+            switch (op) {
+                case 1: {
+                    String inp = reader.readLine();
+                    String name = "";
+                    int i = 0;
+                    while (inp.charAt(i) != '=') {
+                        name = name + inp.charAt(i);
+                        i++;
+                    }
+                    Matrix m = new Matrix();
+                    m = m.setM(inp);
+                    m = m.form();
+                    m = m.checkO(m);
+                    a.matrix.put(name, m);
+                    System.out.println(name + "=");
+                    mo.display(m.matrix);
                 }
-                Matrix m = new Matrix();
-                m = m.setM(inp);
-                m = m.form();
-                m = m.checkO();
-                a.matrix.put(name,m);
-
-            }
-            break;
-            case 2:{
-                System.out.println("Enter the type of Matrix: ");
-                String [] temp = reader.readLine().split(" ");
-                String type = temp[0] + temp[1];
-                type = type.toLowerCase(Locale.ROOT);
-                System.out.println("Enter the name for the matrix: ");
-                String name = reader.readLine();
-                if(mo.Task2(type)!= null) {
+                break;
+                case 2: {
+                    System.out.println("Enter the type of Matrix(note:- write in the format(type Matrix): ");
+                    String[] temp = reader.readLine().split(" ");
+                    String type = temp[0] + temp[1];
+                    type = type.toLowerCase(Locale.ROOT);
+                    System.out.println("Enter the name for the matrix: ");
+                    String name = reader.readLine();
                     Matrix m = mo.Task2(type);
-                    a.matrix.put(name, m);
+                    if (m != null) {
+                        a.matrix.put(name, m);
+                        System.out.println(name + " =");
+                        mo.display(m.matrix);
+                    }
                 }
-            }
-            break;
-            case 3:{
-                System.out.println("Enter the name of the matrix: ");
-                String name = reader.readLine();
-                if(mo.Task3((a.matrix.get(name)))!= null) {
-                    Matrix m = mo.Task3(a.matrix.get(name));
-                    a.matrix.put(name, m);
+                break;
+                case 3: {
+                    System.out.println("Enter the name of the matrix: ");
+                    String name = reader.readLine();
+                    if (mo.Task3((a.matrix.get(name))) != null) {
+                        Matrix m = mo.Task3(a.matrix.get(name));
+                        a.matrix.put(name, m);
+                    }
                 }
-            }
-            break;
-            case 4:{
-                System.out.println("Enter the name of the matrix:");
-                String inp = reader.readLine();
-                for(int i = 0;i<a.matrix.get(inp).status.size();i++) {
-                    String [] s = a.matrix.get(inp).status.get(i).getClass().toString().split(".");
-                    System.out.println(s[s.length-1]);
-                }
-            }
-            break;
-            case 5:{
-                System.out.println("Choose the operation:(+,-,*,/) ");
-                String sign = reader.readLine();
-                switch(sign){
-                    case "+": {
-                        System.out.println("Need to perform Addition. Choose the matrices:");
-                        String [] name = reader.readLine().split(",");
-                        mo.Addition(a.matrix.get(name[0]),a.matrix.get(name[1]));
-                    }
-                    break;
-                    case "-":{
-                        System.out.println("Need to perform Subtraction. Choose the matrices:");
-                        String [] name = reader.readLine().split(",");
-                        mo.Subtraction(a.matrix.get(name[0]),a.matrix.get(name[1]));
-                    }
-                    break;
-                    case "*":{
-                        System.out.println("Need to perform Multiplication. Choose the matrices:");
-                        String [] name = reader.readLine().split(",");
-                        mo.Multiplication(a.matrix.get(name[0]),a.matrix.get(name[1]));
-                    }
-                    break;
-                    case "/":{
-                        System.out.println("Need to perform Division. Choose the matrices:");
-                        String [] name = reader.readLine().split(",");
-                        mo.Multiplication(a.matrix.get(name[0]),a.matrix.get(name[1]));
-                    }
-                    break;
-                }
-            }
-            break;
-            case 6:{
-                System.out.println("Choose the operation:(+,-,*,/) ");
-                String sign = reader.readLine();
-                switch(sign){
-                    case "+": {
-                        System.out.println("Need to perform Element-wise Addition. Choose the matrices:");
-                        String [] name = reader.readLine().split(",");
-                        mo.Addition(a.matrix.get(name[0]),a.matrix.get(name[1]));
-                    }
-                    break;
-                    case "-":{
-                        System.out.println("Need to perform Element-wise Subtraction. Choose the matrices:");
-                        String [] name = reader.readLine().split(",");
-                        mo.Subtraction(a.matrix.get(name[0]),a.matrix.get(name[1]));
-                    }
-                    break;
-                    case "*":{
-                        System.out.println("Need to perform Element-wise Multiplication. Choose the matrices:");
-                        String [] name = reader.readLine().split(",");
-                        mo.EleMultiplication(a.matrix.get(name[0]),a.matrix.get(name[1]));
-                    }
-                    break;
-                    case "/":{
-                        System.out.println("Need to perform Element-wise Division. Choose the matrices:");
-                        String [] name = reader.readLine().split(",");
-                        mo.EleDivision(a.matrix.get(name[0]),a.matrix.get(name[1]));
-                    }
-                    break;
-                }
-            }
-            break;
-            case 7:{
-                System.out.println("Need to transpose a matrix. Choose one matrix: ");
-                String name = reader.readLine();
-                a.matrix.put(name,mo.Transpose(a.matrix.get(name)));
-            }
-            break;
-            case 8:{
-                System.out.println("Need to inverse a matrix. Choose one matrix");
-                String name = reader.readLine();
-                if(a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0){
-                    System.out.println(0);
-                }
-                else if(a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1){
-                    System.out.println("Inverse does not exist");
-                }
-                else if(a.matrix.get(name).r == a.matrix.get(name).c){
-                    mo.InverseMatrix(a.matrix.get(name));
-                }
-                else{
-                    System.out.println("Cannot compute Inverse");
-                }
-            }
-            break;
-            case 9:{
-                System.out.println("""
-                        Choose the type of mean:
-                        1. Row-wise
-                        2. Column-wise
-                        3. Element-wise""");
-                int op2= sc.nextInt();
-                switch(op2){
-                    case 1:{
-                        System.out.println("Compute row-wise mean of a matrix. Choose one matrix");
-                        String name = reader.readLine();
-                        if(a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0){
-                            System.out.println(0);
-                        }
-                        else if(a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1){
-                            System.out.println(a.matrix.get(name).matrix[0][0]);
-                        }
-                        else{
-                            mo.RowMean(a.matrix.get(name));
-                        }
-                    }
-                    break;
-                    case 2:{
-                        System.out.println("Compute column-wise mean of a matrix. Choose one matrix");
-                        String name = reader.readLine();
-                        if(a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0){
-                            System.out.println(0);
-                        }
-                        else if(a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1){
-                            System.out.println(a.matrix.get(name).matrix[0][0]);
-                        }
-                        else{
-                            mo.ColumnMean(a.matrix.get(name));
-                        }
-                    }
-                    break;
-                    case 3:{
-                        System.out.println("Compute element-wise mean of a matrix. Choose one matrix");
-                        String name = reader.readLine();
-                        if(a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0){
-                            System.out.println(0);
-                        }
-                        else if(a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1){
-                            System.out.println(a.matrix.get(name).matrix[0][0]);
-                        }
-                        else{
-                            mo.EleMean(a.matrix.get(name));
+                break;
+                case 4: {
+                    System.out.println("Enter the name of the matrix:");
+                    String inp = reader.readLine();
+                    if (a.matrix.get(inp).status == null) {
+                        System.out.println("No matrix of the given exists");
+                    } else {
+                        for (int i = 0; i < a.matrix.get(inp).status.size(); i++) {
+                            String [] s = a.matrix.get(inp).status.get(i).getClass().toString().split(" ");
+                            StringBuilder name = new StringBuilder();
+                            int q = s[1].length()-1;
+                            while(s[1].charAt(q) != '.'){
+                                name.append(s[1].charAt(q));
+                                q--;
+                            }
+                            System.out.println(name.reverse());
                         }
                     }
                 }
-            }
-            break;
-            case 10:{
-                System.out.println("Compute determinant of a matrix. Choose one matrix. Note: The matrix must be square matrix");
-                String name =  reader.readLine();
-                if(a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0){
-                    System.out.println(0);
+                break;
+                case 5: {
+                    System.out.println("Choose the operation:(+,-,*,/) ");
+                    String sign = reader.readLine();
+                    switch (sign) {
+                        case "+": {
+                            System.out.println("Need to perform Addition. Choose the matrices:");
+                            String[] name = reader.readLine().split(",");
+                            mo.Addition(a.matrix.get(name[0]), a.matrix.get(name[1]));
+                        }
+                        break;
+                        case "-": {
+                            System.out.println("Need to perform Subtraction. Choose the matrices:");
+                            String[] name = reader.readLine().split(",");
+                            mo.Subtraction(a.matrix.get(name[0]), a.matrix.get(name[1]));
+                        }
+                        break;
+                        case "*": {
+                            System.out.println("Need to perform Multiplication. Choose the matrices:");
+                            String[] name = reader.readLine().split(",");
+                            mo.Multiplication(a.matrix.get(name[0]), a.matrix.get(name[1]));
+                        }
+                        break;
+                        case "/": {
+                            System.out.println("Need to perform Division. Choose the matrices:");
+                            String[] name = reader.readLine().split(",");
+                            mo.Multiplication(a.matrix.get(name[0]), a.matrix.get(name[1]));
+                        }
+                        break;
+                    }
                 }
-                else if(a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1){
-                    System.out.println(a.matrix.get(name).matrix[0][0]);
+                break;
+                case 6: {
+                    System.out.println("Choose the operation:(+,-,*,/) ");
+                    String sign = reader.readLine();
+                    switch (sign) {
+                        case "+": {
+                            System.out.println("Need to perform Element-wise Addition. Choose the matrices:");
+                            String[] name = reader.readLine().split(",");
+                            mo.Addition(a.matrix.get(name[0]), a.matrix.get(name[1]));
+                        }
+                        break;
+                        case "-": {
+                            System.out.println("Need to perform Element-wise Subtraction. Choose the matrices:");
+                            String[] name = reader.readLine().split(",");
+                            mo.Subtraction(a.matrix.get(name[0]), a.matrix.get(name[1]));
+                        }
+                        break;
+                        case "*": {
+                            System.out.println("Need to perform Element-wise Multiplication. Choose the matrices:");
+                            String[] name = reader.readLine().split(",");
+                            mo.EleMultiplication(a.matrix.get(name[0]), a.matrix.get(name[1]));
+                        }
+                        break;
+                        case "/": {
+                            System.out.println("Need to perform Element-wise Division. Choose the matrices:");
+                            String[] name = reader.readLine().split(",");
+                            mo.EleDivision(a.matrix.get(name[0]), a.matrix.get(name[1]));
+                        }
+                        break;
+                    }
                 }
-                else if(a.matrix.get(name).r == a.matrix.get(name).c) {
-                    System.out.println(mo.determinant(a.matrix.get(name).matrix, a.matrix.get(name).matrix.length));
+                break;
+                case 7: {
+                    System.out.println("Need to transpose a matrix. Choose one matrix: ");
+                    String name = reader.readLine();
+                    a.matrix.put(name, mo.Transpose(a.matrix.get(name)));
                 }
-                else{
-                    System.out.println("Cannot compute determinant");
+                break;
+                case 8: {
+                    System.out.println("Need to inverse a matrix. Choose one matrix");
+                    String name = reader.readLine();
+                    if (a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0) {
+                        System.out.println(0);
+                    } else if (a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1) {
+                        System.out.println("Inverse does not exist");
+                    } else if (a.matrix.get(name).r == a.matrix.get(name).c) {
+                        mo.InverseMatrix(a.matrix.get(name));
+                    } else {
+                        System.out.println("Cannot compute Inverse");
+                    }
                 }
-            }
-            break;
-            case 11:{
-                System.out.println("Use singleton matrix in matrix operations. Do you allow using singleton matrices as a scalar value?");
-                String inp = reader.readLine();
-                if(inp.equals("yes")){
-                    System.out.println("Then choose a matrix");
+                break;
+                case 9: {
+                    System.out.println("""
+                            Choose the type of mean:
+                            1. Row-wise
+                            2. Column-wise
+                            3. Element-wise""");
+                    int op2 = sc.nextInt();
+                    switch (op2) {
+                        case 1: {
+                            System.out.println("Compute row-wise mean of a matrix. Choose one matrix");
+                            String name = reader.readLine();
+                            if (a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0) {
+                                System.out.println(0);
+                            } else if (a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1) {
+                                System.out.println(a.matrix.get(name).matrix[0][0]);
+                            } else {
+                                mo.RowMean(a.matrix.get(name));
+                            }
+                        }
+                        break;
+                        case 2: {
+                            System.out.println("Compute column-wise mean of a matrix. Choose one matrix");
+                            String name = reader.readLine();
+                            if (a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0) {
+                                System.out.println(0);
+                            } else if (a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1) {
+                                System.out.println(a.matrix.get(name).matrix[0][0]);
+                            } else {
+                                mo.ColumnMean(a.matrix.get(name));
+                            }
+                        }
+                        break;
+                        case 3: {
+                            System.out.println("Compute element-wise mean of a matrix. Choose one matrix");
+                            String name = reader.readLine();
+                            if (a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0) {
+                                System.out.println(0);
+                            } else if (a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1) {
+                                System.out.println(a.matrix.get(name).matrix[0][0]);
+                            } else {
+                                mo.EleMean(a.matrix.get(name));
+                            }
+                        }
+                    }
+                }
+                break;
+                case 10: {
+                    System.out.println("Compute determinant of a matrix. Choose one matrix. Note: The matrix must be square matrix");
+                    String name = reader.readLine();
+                    if (a.matrix.get(name).r == 0 && a.matrix.get(name).c == 0) {
+                        System.out.println(0);
+                    } else if (a.matrix.get(name).r == 1 && a.matrix.get(name).c == 1) {
+                        System.out.println(a.matrix.get(name).matrix[0][0]);
+                    } else if (a.matrix.get(name).r == a.matrix.get(name).c) {
+                        System.out.println(mo.determinant(a.matrix.get(name).matrix, a.matrix.get(name).matrix.length));
+                    } else {
+                        System.out.println("Cannot compute determinant");
+                    }
+                }
+                break;
+                case 11: {
+                    System.out.println("Use singleton matrix in matrix operations. Do you allow using singleton matrices as a scalar value?");
+                    String inp = reader.readLine();
+                    if (inp.equals("yes")) {
+                        System.out.println("Then choose a matrix");
+                        String name1 = reader.readLine();
+                        System.out.println("Choose a singleton matrix now.");
+                        String name2 = reader.readLine();
+                        if (a.matrix.get(name2).c == 1 && a.matrix.get(name2).r == 1) {
+                            System.out.println("Choose Operation:(/,*)");
+                            String sign = reader.readLine();
+                            mo.Task11(a.matrix.get(name2), a.matrix.get(name1), sign);
+                        } else {
+                            System.out.println("The chosen matrix is not singleton");
+                        }
+                    }
+                }
+                break;
+                case 12: {
+                    System.out.println("Compute A+A' of a matrix. Choose one matrix. Note that it must be a square matrix.");
+                    String name = reader.readLine();
+                    if (a.matrix.get(name).r == a.matrix.get(name).c && a.matrix.get(name).c != 1 && a.matrix.get(name).r != 1) {
+                        mo.AddTranspose(a.matrix.get(name));
+                    } else {
+                        System.out.println("the chosen matrix is not a square matrix");
+                    }
+                }
+                break;
+                case 13: {
+                    System.out.println("Compute eigen values of a matrix.");
+                    System.out.println("Choose a square matrix");
+                    String name = reader.readLine();
+                    if (a.matrix.get(name).r == a.matrix.get(name).c && a.matrix.get(name).c != 1 && a.matrix.get(name).r != 1) {
+                        mo.EigenVaV(a.matrix.get(name));
+                    } else {
+                        System.out.println("the chosen matrix is not a square matrix");
+                    }
+                }
+                break;
+                case 14: {
+                    System.out.println("Solve a set of linear equation.");
+                    System.out.println("Choose a square matrix");
                     String name1 = reader.readLine();
-                    System.out.println("Choose a singleton matrix now.");
+                    System.out.println("Choose a column matrix. Note: this should have same number of rows as the one you entered just now");
                     String name2 = reader.readLine();
-                    if(a.matrix.get(name2).c == 1 && a.matrix.get(name2).r == 1) {
-                        System.out.println("Choose Operation:(/,*)");
-                        String sign = reader.readLine();
-                        mo.Task11(a.matrix.get(name2), a.matrix.get(name1), sign);
-                    }
-                    else{
-                        System.out.println("The chosen matrix is not singleton");
+                    if (a.matrix.get(name1).r == a.matrix.get(name1).c && a.matrix.get(name1).r == a.matrix.get(name2).r && a.matrix.get(name2).c == 1) {
+                        mo.SolveMatrix(a.matrix.get(name1), a.matrix.get(name2));
+                    } else {
+                        System.out.println("Input given are of not correct dimension");
                     }
                 }
+                break;
+                case 15: {
+                    System.out.println("Enter type of matrices you want to retrieve: ");
+                    String type = reader.readLine();
+                    ArrayList<Matrix> m = new ArrayList<>();
+                    a.matrix.forEach((k, v) ->
+                            m.add(v)
+                    );
+                    mo.Task15(m, type);
+                }
+                break;
+                default:
+                    System.exit(0);
             }
-            break;
-            case 12:{
-                System.out.println("Compute A+A' of a matrix. Choose one matrix. Note that it must be a square matrix.");
-                String name = reader.readLine();
-                if(a.matrix.get(name).r == a.matrix.get(name).c && a.matrix.get(name).c != 1 && a.matrix.get(name).r != 1) {
-                    mo.AddTranspose(a.matrix.get(name));
-                }
-                else{
-                    System.out.println("the chosen matrix is not a square matrix");
-                }
-            }
-            break;
-            case 13:{
-                System.out.println("Compute eigen values of a matrix.");
-                System.out.println("Choose a square matrix");
-                String name = reader.readLine();
-                if(a.matrix.get(name).r == a.matrix.get(name).c && a.matrix.get(name).c != 1 && a.matrix.get(name).r != 1) {
-                    mo.EigenVaV(a.matrix.get(name));
-                }
-                else{
-                    System.out.println("the chosen matrix is not a square matrix");
-                }
-            }
-            break;
-            case 14:{
-                System.out.println("Solve a set of linear equation.");
-                System.out.println("Choose a square matrix");
-                String name1 = reader.readLine();
-                System.out.println("Choose a column matrix. Note: this should have same number of rows as the one you entered just now");
-                String name2 = reader.readLine();
-                if(a.matrix.get(name1).r == a.matrix.get(name1).c && a.matrix.get(name1).r == a.matrix.get(name2).r && a.matrix.get(name2).c == 1) {
-                    mo.SolveMatrix(a.matrix.get(name1), a.matrix.get(name2));
-                }
-                else{
-                    System.out.println("Input given are of not correct dimension");
-                }
-            }
-            break;
-            case 15:{
-                System.out.println("Enter type of matrices you want to retrieve: ");
-                String type = reader.readLine();
-                ArrayList<Matrix> m = new ArrayList<>();
-                a.matrix.forEach((k,v) ->
-                    m.add(v)
-                );
-                mo.Task15(m,type);
-            }
-            break;
-            default:System.exit(0);
         }
     }
 }
